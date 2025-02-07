@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGS PUAN HESAPLAMA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1295813135811908"
+    crossorigin="anonymous"></script>
+    <script>
+        function validateInput(input, ders) {
+    let value = parseFloat(input.value) || 0;
+
+
+
+// Eğer ders Türkçe, Fen ya da Matematik ise doğru sayısını 20'ye yuvarla
+if (ders === 'turkce' || ders === 'fen' || ders === 'matematik') {
+    if (value > 20) {
+        input.value = 20;
+    }
+}
+
+
+            }
+                
+        
+                function calculateNet(dogruInput, yanlisInput, netOutput, ders) {
+            validateInput(dogruInput, ders); // Ders bilgisini de geçiyoruz
+            validateInput(yanlisInput, ders);
+            let dogru = parseFloat(dogruInput.value) || 0;
+            let yanlis = parseFloat(yanlisInput.value) || 0;
+            let net = dogru - (yanlis / 3);
+            netOutput.value = net.toFixed(2);
+        }
+
+
+        function calculateNet(dogruInput, yanlisInput, netOutput) {
+            validateInput(dogruInput);
+            validateInput(yanlisInput);
+            let dogru = parseFloat(dogruInput.value) || 0;
+            let yanlis = parseFloat(yanlisInput.value) || 0;
+            let net = dogru - (yanlis / 3);
+            netOutput.value = net.toFixed(2);
+        }
+
+        function attachNetCalculation() {
+            const rows = document.querySelectorAll('tr');
+            rows.forEach(row => {
+                const dogruInput = row.querySelector('input[name$="_dogru"]');
+                const yanlisInput = row.querySelector('input[name$="_yanlis"]');
+                const netOutput = row.querySelector('input[name$="_net"]');
+
+                if (dogruInput && yanlisInput && netOutput) {
+                    dogruInput.addEventListener('input', () => calculateNet(dogruInput, yanlisInput, netOutput));
+                    yanlisInput.addEventListener('input', () => calculateNet(dogruInput, yanlisInput, netOutput));
+                }
+            });
+        }
+
+        function calculateAndSubmit() {
+            const dersler = ['turkce', 'matematik', 'fen', 'sosyal', 'din', 'ingilizce'];
+            let toplamDogru = 0, toplamYanlis = 0, toplamNet = 0;
+
+            dersler.forEach(ders => {
+                const dogruInput = document.querySelector(`input[name="${ders}_dogru"]`);
+                const yanlisInput = document.querySelector(`input[name="${ders}_yanlis"]`);
+                const netOutput = document.querySelector(`input[name="${ders}_net"]`);
+
+                const dogru = parseFloat(dogruInput.value) || 0;
+                const yanlis = parseFloat(yanlisInput.value) || 0;
+
+                const net = dogru - (yanlis / 3);
+                netOutput.value = net.toFixed(2);
+
+                toplamDogru += dogru;
+                toplamYanlis += yanlis;
+                toplamNet += net;
+            });
+            
+            let katsayilar = {
+            2024: { turkce: 3.0, matematik: 3.0, fen: 3.0, diger: 1.5 },
+            2023: { turkce: 3.1, matematik: 3.1, fen: 3.1, diger: 1.6 },
+            2022: { turkce: 3.2, matematik: 3.2, fen: 3.2, diger: 1.7 },
+            2021: { turkce: 3.3, matematik: 3.3, fen: 3.3, diger: 1.8 },
+            2020: { turkce: 3.4, matematik: 3.4, fen: 3.4, diger: 1.9 }
+        };    
+
+            let toplamPuan = 196.62;
+            dersler.forEach(ders => {
+                const net = parseFloat(document.querySelector(`input[name="${ders}_net"]`).value) || 0;
+                toplamPuan += net * katsayilar[ders];
+            });
+
+            document.getElementById('hesaplananPuan').textContent = toplamPuan.toFixed(2);
+            document.getElementById('toplamDogru').textContent = toplamDogru;
+            document.getElementById('toplamYanlis').textContent = toplamYanlis;
+            document.getElementById('toplamNet').textContent = toplamNet.toFixed(2);
+            document.getElementById('toplamNetSayisi').textContent = `${toplamDogru} doğru, ${toplamYanlis} yanlış = ${toplamNet.toFixed(2)} net`;
+        }
+
+        function clearForm() {
+            if (confirm("Formu temizlemek istediğinize emin misiniz?")) {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => input.value = "");
+                const outputs = document.querySelectorAll('input[readonly]');
+                outputs.forEach(output => output.value = "");
+                document.getElementById('hesaplananPuan').textContent = '';
+                document.getElementById('toplamNetSayisi').textContent = '';
+            }
+        
+        }
+        
+        window.onload = attachNetCalculation;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h2>LGS PUAN HESAPLAMA</h2>
+        </header>
+        <div class="main-content">
+            <div class="form-section">
+                <form method="POST">
+                    <table class="anatablo">
+                        <select id="deger">
+                            <option value="2018">2018 verileriyle hesapla</option>
+                            <option value="2019">2019 verileriyle hesapla</option>
+                            <option value="2020">2020 verileriyle hesapla</option>
+                            <option value="2021">2021 verileriyle hesapla</option>
+                            <option value="2022">2022 verileriyle hesapla</option>
+                            <option value="2023">2023 verileriyle hesapla</option>
+                            <option value="2024">2024 verileriyle hesapla</option>
+                        </select>
+                        
+
+                        
+                        
+                        <tr>
+                            
+
+                            <th>Dersler</th>
+                            <th>Doğru</th>
+                            <th>Yanlış</th>
+                            <th>Net</th>
+                        </tr>
+                        <tr>
+                            <td><label for="turkce">Türkçe</label></td>
+                            <td><input type="number" name="turkce_dogru" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="turkce_yanlis" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="turkce_net" placeholder="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><label for="matematik">Matematik</label></td>
+                            <td><input type="number" name="matematik_dogru" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="matematik_yanlis" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="matematik_net" placeholder="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><label for="fen">Fen Bilimleri</label></td>
+                            <td><input type="number" name="fen_dogru" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="fen_yanlis" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="fen_net" placeholder="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><label for="sosyal">İnkılap</label></td>
+                            <td><input type="number" name="sosyal_dogru" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="sosyal_yanlis" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="sosyal_net" placeholder="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><label for="din">Din Kültürü</label></td>
+                            <td><input type="number" name="din_dogru" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="din_yanlis" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="din_net" placeholder="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><label for="ingilizce">İngilizce</label></td>
+                            <td><input type="number" name="ingilizce_dogru" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="ingilizce_yanlis" min="0" placeholder="0" required></td>
+                            <td><input type="number" name="ingilizce_net" placeholder="0" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Toplam</strong></td>
+                            <td id="toplamDogru">0</td>
+                            <td id="toplamYanlis">0</td>
+                            <td id="toplamNet">0</td>
+                        </tr>
+                        
+                        
+                    </table>
+                    <button type="button" onclick="calculateAndSubmit()">Hesapla</button>
+                    <button type="button" onclick="clearForm()">Temizle</button>
+                </form>
+
+                <!-- Yüzdelik Dilimi Tablosu -->
+                <table class="small-table">
+                    <thead>
+                        <tr>
+                           
+                            <th>Yüzdelik dilim</th>
+
+                            <th>Puan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Yüzdelk dilim</td>
+                            <td><span id="hesaplananPuan">0</span></td>
+                        </tr>
+                        
+                            
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+    </div>
+</body>
+<h7>*Soru sayıları MEB'in LGS sınavında soracağı standart soru sayılarına göre yazılmıştır.</h7>                 
+
+
+
+
+<h8>**Puan bilgi amaçlı olup, herhangi bir resmi geçerliliği yoktur.</h8>
+<h9>***Verilen yüzdelik dilimlerde geçen seneki veriler referans alınmıştır.</h9>
+<h6>j</h6>
+<a href="puan.html"><puan class="html"></puan><span>Küçük </span></a>
+
+</html>
+
